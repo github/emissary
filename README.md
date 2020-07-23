@@ -98,7 +98,7 @@ It is configured completely by environment variables:
 ```
 '{"spiffe://domain.test/app": [{"path":"/put","methods":["PUT"]},{"path":"/p","methods":["PATCH"]},{"path":"/g","methods":["GET"]}]}'
 ```
-* `EMISSARY_EGRESS_MAP` (optional but required egress access) - this is a `json` list of key/value pairs of `Host` headers and SPIFFE IDs, this is how we can figure out the name of the service that is the destination for a request. The format is expected to be:
+* `EMISSARY_EGRESS_MAP` (optional but required egress access) - this is a `json` map of `Host` headers and SPIFFE IDs, this is how Emissary can figure out the name of the service that is the destination for a request. The format is expected to be:
 ```
 '{"app.domain.test": "spiffe://domain.test/app"}'
 ```
