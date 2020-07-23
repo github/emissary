@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+
+export COMPOSE_INTERACTIVE_NO_CLI=1
+export EMISSARY_IMAGE_TAG=$(git rev-parse --short HEAD)
+
+docker build . -f tests/integration/Dockerfile.emissary -t emissary-integration:${EMISSARY_IMAGE_TAG}
+docker build . -f tests/integration/Dockerfile.haproxy -t haproxy-integration:${EMISSARY_IMAGE_TAG}
+
+cd tests/integration
+bash ./run.sh
+bash ./cleanup.sh

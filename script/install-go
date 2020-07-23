@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -e
+
+# INSTALL GO
+export ROOTDIR="$(git rev-parse --show-toplevel)"
+export SETUP_DIR="$ROOTDIR/.setup"
+export GO_VERSION=go1.14
+export GO_PKG_DARWIN=${GO_VERSION}.darwin-amd64.tar.gz
+export GO_PKG_LINUX=${GO_VERSION}.linux-amd64.tar.gz
+
+cd $ROOTDIR
+
+GODIR="$ROOTDIR/.setup/.go"
+export GOROOT="$GODIR/go"
+GOBIN="$GOROOT/bin/go"
+
+# Check if cached install exists and has the right version, and install otherwise.
+if [ ! -f "$GOBIN" ] || [ -z "$($GOBIN version | grep $GO_VERSION)" ]; then
+  echo "Go version '$GO_VERSION' not found in SETUP_DIR, downloading it..."
+  mkdir -p $GODIR
+  cd $GODIR
+  if [ $(uname -s) = "Darwin" ]; then
+    curl -s -L -O https://storage.googleapis.com/golang/$GO_PKG_DARWIN
+    tar -xf $GO_PKG_DARWIN
+  else
+    curl -s -L -O https://storage.googleapis.com/golang/$GO_PKG_LINUX
+    tar xf $GO_PKG_LINUX
+  fi
+  echo "$GO_VERSION installed in $GODIR: Go Binary: $GOBIN"
+fi

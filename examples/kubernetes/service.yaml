@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: very-dope-application
+  labels:
+    service: very-dope-application
+spec:
+  ports:
+    - name: https
+      port: 80
+      protocol: TCP
+      targetPort: 443
+  selector:
+    app: very-dope-application
+  type: LoadBalancer

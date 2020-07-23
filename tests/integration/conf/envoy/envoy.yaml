@@ -1,0 +1,133 @@
+admin:
+  access_log_path: /dev/stdout
+  address:
+    socket_address:
+      protocol: TCP
+      address: 0.0.0.0
+      port_value: 9901
+static_resources:
+  listeners:
+    - name: ingress_listener
+      address:
+        socket_address:
+          protocol: TCP
+          address: 0.0.0.0
+          port_value: 8080
+      filter_chains:
+        - filters:
+            - name: envoy.http_connection_manager
+              config:
+                codec_type: auto
+                stat_prefix: ingress
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: ingress
+                      domains: ["*"]
+                      routes:
+                      - match:
+                          prefix: "/"
+                          headers:
+                            - name: x-emissary-auth
+                              present_match: true
+                        route:
+                          cluster: app_container
+                      ##### if we dont have a x-emissary-auth header skip 
+                      ##### auth to avoid blocking services tha are not
+                      ##### emissary enabled
+                      - match:
+                          prefix: "/"
+                        per_filter_config:
+                          envoy.ext_authz:
+                            disabled: true
+                        route:
+                          cluster: app_container
+                http_filters:
+                  - name: envoy.ext_authz
+                    config:
+                      http_service:
+                        server_uri:
+                          uri: ext-authz
+                          cluster: ext-authz
+                          timeout: 1s
+                        authorization_request:
+                          headers_to_add:
+                            - key: x-emissary-mode
+                              value: "ingress"
+                          allowed_headers:
+                            patterns:
+                              - exact: x-emissary-auth
+                        authorization_response:
+                          allowed_upstream_headers:
+                            patterns:
+                              - exact: x-emissary-auth-status
+                          allowed_client_headers:
+                            patterns:
+                              - exact: x-emissary-auth-status
+                  - name: envoy.router
+    - name: egress_listener
+      address:
+        socket_address:
+          protocol: TCP
+          address: 0.0.0.0
+          port_value: 18000
+      filter_chains:
+      - filters:
+        - name: envoy.http_connection_manager
+          config:
+            codec_type: auto
+            stat_prefix: egress
+            route_config:
+              name: local_route
+              virtual_hosts:
+              - name: egress
+                domains: ["*"]
+                routes:
+                - match:
+                    prefix: "/"
+                  route:
+                    cluster: app_container
+            http_filters:
+              - name: envoy.ext_authz
+                config:
+                  http_service:
+                    server_uri:
+                      uri: ext-authz
+                      cluster: ext-authz
+                      timeout: 1s
+                    authorization_request:
+                      headers_to_add:
+                        - key: x-emissary-mode
+                          value: "egress"
+                    authorization_response:
+                      allowed_upstream_headers:
+                        patterns:
+                          - exact: x-emissary-auth
+              - name: envoy.router
+  clusters:
+    - name: app_container
+      connect_timeout: 2s
+      type: strict_dns
+      lb_policy: round_robin
+      load_assignment:
+        cluster_name: app_container
+        endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: app_container
+                    port_value: 8000
+    - name: ext-authz
+      connect_timeout: 2s
+      type: strict_dns
+      lb_policy: round_robin
+      load_assignment:
+        cluster_name: emissary
+        endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: emissary
+                    port_value: 9090

@@ -1,0 +1,24 @@
+FROM golang:1.14.6-buster AS emissary-build
+
+ADD . /go/src/github.com/github/emissary
+WORKDIR /go/src/github.com/github/emissary
+RUN CGO_ENABLED=0 go install -v ./cmd/emissary
+
+FROM debian:buster AS spire-build
+
+RUN apt-get update
+RUN apt-get install -y wget
+RUN wget -q https://github.com/spiffe/spire/releases/download/v0.10.1/spire-0.10.1-linux-x86_64-glibc.tar.gz
+RUN tar zxf spire-0.10.1-linux-x86_64-glibc.tar.gz
+
+FROM debian:buster
+
+RUN apt-get update
+RUN apt-get install -y curl procps
+
+COPY --from=emissary-build /go/bin/emissary /usr/local/bin/emissary
+COPY --from=spire-build /spire-0.10.1/bin/spire-agent /usr/local/bin/spire-agent
+COPY tests/integration/wrapper.sh /wrapper.sh
+
+ENTRYPOINT ["/wrapper.sh"]
+EXPOSE 9090

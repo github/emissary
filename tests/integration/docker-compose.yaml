@@ -1,0 +1,75 @@
+version: '3'
+services:
+  spire-server:
+    image: gcr.io/spiffe-io/spire-server:0.9.0
+    hostname: spire-server
+    networks:
+      - integration
+    volumes:
+      - ./conf/server:/opt/spire/conf/server
+    command: ["-config", "/opt/spire/conf/server/server.conf", "-logLevel", "debug"]
+  envoy:
+    image: envoyproxy/envoy:v1.12.2
+    hostname: envoy
+    restart: on-failure
+    networks:
+      - integration
+    ports:
+      - "8080:8080"
+      - "9901:9901"
+      - "18000:18000"
+    links:
+      - app_container
+      - emissary
+    volumes:
+      - ./conf/envoy/envoy.yaml:/etc/envoy/envoy.yaml
+    command: ["--config-path", "/etc/envoy/envoy.yaml", "--log-level", "debug"]
+  haproxy:
+    image: haproxy-integration:${EMISSARY_IMAGE_TAG}
+    hostname: haproxy
+    restart: on-failure
+    networks:
+      - integration
+    ports:
+      - "7070:7070"
+      - "17000:17000"
+    links:
+      - app_container
+      - emissary
+    volumes:
+      - ./conf/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - ./conf/haproxy/emissary.lua:/usr/local/etc/haproxy/emissary.lua
+  app_container:
+    image: docker.io/citizenstig/httpbin
+    hostname: app_container
+    restart: on-failure
+    networks:
+      - integration
+    ports:
+      - "8000:8000"
+  emissary:
+    image: emissary-integration:${EMISSARY_IMAGE_TAG}
+    environment:
+      EMISSARY_IDENTIFIER: spiffe://domain.test/ingress
+      EMISSARY_INGRESS_MAP: '{"spiffe://domain.test/app": [{"path":"/put","methods":["PUT"]},{"path":"/p","methods":["PATCH"]},{"path":"/g","methods":["GET"]}]}'
+      EMISSARY_EGRESS_MAP: '{"app.domain.test": "spiffe://domain.test/app"}'
+      EMISSARY_SPIRE_SOCKET: /tmp/agent.sock
+      EMISSARY_LISTENER: tcp://0.0.0.0:9090
+      EMISSARY_LOG_LEVEL: debug
+    hostname: emissary
+    restart: on-failure
+    networks:
+      integration:
+        ipv4_address: 172.200.1.100
+    links:
+      - spire-server
+    ports:
+      - "9090:9090"
+      - "9191:9191"
+    volumes:
+      - ./conf/agent:/opt/spire/conf/agent
+networks:
+  integration:
+    ipam:
+      config:
+        - subnet: 172.200.1.0/24

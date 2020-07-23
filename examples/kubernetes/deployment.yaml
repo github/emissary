@@ -1,0 +1,79 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: very-dope-application
+  labels:
+    app: very-dope-application
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: very-dope-application
+  template:
+    metadata:
+      labels:
+        app: very-dope-application
+    spec:
+      containers:
+        - name: very-dope-application
+          image: very-dope-application
+          env:
+            - name: PORT
+              value: "3001"
+          ports:
+            - containerPort: 3001
+              protocol: TCP
+        - name: envoy
+          image: envoyproxy/envoy:v1.12.2
+          command: ["envoy"]
+          args: ["--config-path", "/etc/envoy/envoy.yaml"]
+          volumeMounts:
+            - name: envoy-config
+              mountPath: /etc/envoy
+            - name: localhost-tls
+              mountPath: /etc/ssl
+            - name: emissary-socket
+              mountPath: /run/emissary/sockets
+              readOnly: false
+          ports:
+            - containerPort: 443
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 9901
+        - name: emissary
+          image: emissary:<version> ## FIXME
+          volumeMounts:
+            - name: spire-agent-socket
+              mountPath: /run/spire/sockets
+              readOnly: false
+            - name: emissary-socket
+              mountPath: /run/emissary/sockets
+              readOnly: false
+          env:
+          - name: EMISSARY_LOG_LEVEL
+            value: debug
+          - name: EMISSARY_IDENTIFIER
+            value: "spiffe://domain.test/trustworthy"
+          - name: EMISSARY_INGRESS_MAP
+            value: "{"spiffe://domain.test/app": [{"path":"/put","methods":["PUT"]},{"path":"/p","methods":["PATCH"]},{"path":"/g","methods":["GET"]}]}"
+          - name: EMISSARY_EGRESS_MAP
+            value: "{"app.domain.test": "spiffe://domain.test/app"}"
+          livenessProbe:
+            httpGet:
+              port: 9191
+      volumes:
+        - name: envoy-config
+          configMap:
+            name: envoy-config
+        - name: localhost-tls
+          hostPath:
+            path: /etc/ssl
+            type: Directory
+        - name: spire-agent-socket
+          hostPath:
+            path: /run/spire/sockets
+            type: Directory
+        - name: emissary-socket
+          emptyDir: {}

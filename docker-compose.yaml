@@ -1,0 +1,7 @@
+version: "3.6"
+services:
+  emissary:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: emissary:${BUILD_SHA}

@@ -1,0 +1,9 @@
+FROM haproxy:1.8
+
+COPY tests/integration/conf/haproxy/haproxy.cfg /usr/local/etc/haproxy/haproxy.cfg
+COPY tests/integration/conf/haproxy/emissary.lua /usr/local/etc/haproxy/emissary.lua
+
+RUN apt-get update
+RUN apt-get install -y lua-socket
+
+CMD ["haproxy", "-d", "-V", "-f", "/usr/local/etc/haproxy/haproxy.cfg"]

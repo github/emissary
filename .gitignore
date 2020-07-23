@@ -1,0 +1,5 @@
+bin
+tmp
+.setup
+tests/integration/conf/agent/agent.conf
+tests/integration/conf/agent/bootstrap.crt
