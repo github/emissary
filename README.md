@@ -165,10 +165,6 @@ If you have a problem or suggestion, please [open an issue](https://github.com/g
 
 Emissary is licensed under the [MIT license](LICENSE).
 
-The MIT license grant is not for GitHub's trademarks, which include the logo designs. GitHub reserves all trademark and copyright rights in and to all GitHub trademarks. GitHub's logos include, for instance, the stylized designs that include "logo" in the file title in the following folder: https://github.com/github/emissary/tree/master/docs/logos/
-
-GitHub® and its stylized versions and the Invertocat mark are GitHub's Trademarks or registered Trademarks. When using GitHub's logos, be sure to follow the GitHub logo guidelines.
-
 ## Authors
 
 Emissary was designed and authored by [Joe Williams](https://github.com/joewilliams), [Ben Burry](https://github.com/benburry), [Antoine Grondin](https://github.com/aybabtme) and [Eric Lee](https://github.com/elee). It is now maintained, reviewed, and tested by Internal Interfaces team at GitHub.
