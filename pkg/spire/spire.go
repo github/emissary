@@ -21,7 +21,7 @@ type JWTSVID interface {
 	Validate(ctx context.Context, svid string, identifier string) (bool, string, error)
 }
 
-// AuthClient is the the struct that carries the data needed to communicate with spire-agent in the http handler
+// AuthClient is the struct that carries the data needed to communicate with spire-agent in the http handler
 type AuthClient struct {
 	Ready        bool
 	spiffeClient workload.SpiffeWorkloadAPIClient
