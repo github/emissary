@@ -11,7 +11,7 @@ Emissary uses Envoy's `ext_authz` filter (or another means in any proxy to perfo
 ![](./diagram.png)
 
 ### Ingress Requests (requests from external services)
-When a request *from* an external service is made Envoy receives the request and makes a subsequent request via the `ext_authz` filter setting the `x-emissary-mode:ingress` header. This tells Emissary that this is an ingress request which will require validating the JWT-SVID contained in the `x-emissary-auth` header in the original request. Emissary uses the contents of JWT-SVID to determine if the origin of the request is an allowed SPIFFE ID, set by `EMISSARY_INGRESS_MAP`. If so, Envoy forward the request on to the service.
+When a request *from* an external service is made Envoy receives the request and makes a subsequent request via the `ext_authz` filter setting the `x-emissary-mode:ingress` header. This tells Emissary that this is an ingress request which will require validating the JWT-SVID contained in the `x-emissary-auth` header in the original request. Emissary uses the contents of JWT-SVID to determine if the origin of the request is an allowed SPIFFE ID, set by `EMISSARY_INGRESS_MAP`. If so, Envoy forwards the request on to the service.
 
 ### Egress Requests (requests to external services)
 When a request from the internal service is made *to* an external service the internal service sends the request to Envoy setting the host header for the destination. Envoy receives the request and makes a subsequent request via the `ext_authz` filter setting the `x-emissary-mode:egress` header. This tells Emissary this is an egress request which will require fetching and setting a JWT-SVID in the `x-emissary-auth` header. To fetch a usable JWT-SVID Emissary uses `EMISSARY_EGRESS_MAP` to look up the SPIFFE ID of the destination of the request based on the host header. Envoy injects the `x-emissary-auth` header into the original outgoing request and forwards it.
@@ -164,10 +164,6 @@ If you have a problem or suggestion, please [open an issue](https://github.com/g
 ## License
 
 Emissary is licensed under the [MIT license](LICENSE).
-
-The MIT license grant is not for GitHub's trademarks, which include the logo designs. GitHub reserves all trademark and copyright rights in and to all GitHub trademarks. GitHub's logos include, for instance, the stylized designs that include "logo" in the file title in the following folder: https://github.com/github/emissary/tree/master/docs/logos/
-
-GitHub® and its stylized versions and the Invertocat mark are GitHub's Trademarks or registered Trademarks. When using GitHub's logos, be sure to follow the GitHub logo guidelines.
 
 ## Authors
 

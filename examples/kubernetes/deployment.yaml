@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: very-dope-application
@@ -57,9 +57,9 @@ spec:
           - name: EMISSARY_IDENTIFIER
             value: "spiffe://domain.test/trustworthy"
           - name: EMISSARY_INGRESS_MAP
-            value: "{"spiffe://domain.test/app": [{"path":"/put","methods":["PUT"]},{"path":"/p","methods":["PATCH"]},{"path":"/g","methods":["GET"]}]}"
+            value: '{"spiffe://domain.test/app": [{"path":"/put","methods":["PUT"]},{"path":"/p","methods":["PATCH"]},{"path":"/g","methods":["GET"]}]}'
           - name: EMISSARY_EGRESS_MAP
-            value: "{"app.domain.test": "spiffe://domain.test/app"}"
+            value: '{"app.domain.test": "spiffe://domain.test/app"}'
           livenessProbe:
             httpGet:
               port: 9191

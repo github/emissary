@@ -32,8 +32,8 @@ static_resources:
                               present_match: true
                         route:
                           cluster: app_container
-                      ##### if we dont have a x-emissary-auth header skip 
-                      ##### auth to avoid blocking services tha are not
+                      ##### if we dont have a x-emissary-auth header skip
+                      ##### auth to avoid blocking services that are not
                       ##### emissary enabled
                       - match:
                           prefix: "/"
