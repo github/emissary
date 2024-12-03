@@ -155,7 +155,7 @@ In this configuration it is important to note that both `PATCH` and `OPTIONS` re
 
 ## Contributing
 
-Please see our [contributing document](/CONTRIBUTING.md) if you would like to participate!
+Please see our [contributing document](/CONTRIBUTING.md) if you would like to participate.
 
 ## Getting help
 
