@@ -10,7 +10,7 @@ import (
 
 	"github.com/andres-erbsen/clock"
 	"github.com/sirupsen/logrus"
-	"github.com/spiffe/go-spiffe/proto/spiffe/workload"
+	"github.com/spiffe/go-spiffe/v2/proto/spiffe/workload"
 	"github.com/spiffe/spire/api/workload/dial"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -141,12 +141,11 @@ func (x *x509Client) Start() error {
 	}()
 
 	err := x.hooks.streamX509SVID(ctx, x.c, out)
-	switch err {
-	case nil, context.Canceled:
+	if errors.Is(err, context.Canceled) {
 		return nil
-	default:
-		return err
 	}
+
+	return err
 }
 
 func (x *x509Client) Stop() {
